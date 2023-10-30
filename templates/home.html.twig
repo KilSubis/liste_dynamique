@@ -1,0 +1,59 @@
+{% extends 'layouts/base.html.twig' %}
+
+{% block title 'Contact' %}
+
+{% block body %}
+    <div class="row">
+        <div class="col-6 mx-auto">
+            <h1 class="display-4 my-5"> Dynamique form test</h1>
+
+            {{ form_start(form) }}
+                {% if form.vars.errors is not empty %}
+                    <div class="mb-3 text-center">
+                        {{ form_errors(form) }}
+                    </div>
+                {% endif %}
+
+                {{ form_row(form.nom) }}
+                {{ form_row(form.pays) }}
+                {{ form_row(form.ville) }}
+                {{ form_row(form.message) }}
+
+                <button type="submit" class="btn btn-primary w-100" formnovalidate>Send</button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const paysSelectEl = document.getElementById('ticket_form_pays');
+
+            paysSelectEl.addEventListener('change', function(e) {
+                const formEl = paysSelectEl.closest('form');
+
+                fetch(formEl.action, {
+                    method: formEl.method,
+                    body: new FormData(formEl)
+                })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newVilleFormFieldEl = doc.getElementById('ticket_form_ville');
+
+                    newVilleFormFieldEl.addEventListener('change', function(e) {
+                        e.target.classList.remove('is-invalid');
+                    });
+
+                    document.getElementById('ticket_form_ville').replaceWith(newVilleFormFieldEl);
+                })
+                .catch(function (err) {
+                    console.warn('Something went wrong.', err);
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
